@@ -15,6 +15,32 @@ libtrack.get('/login', (req, res) => {
     res.render('login');
 });
 
+libtrack.post('/login', (req, res) => {
+    let username = req.body.username;
+    let password = req.body.password;
+
+    conn.query(
+        "SELECT * FROM user_acc WHERE username = ? AND password = ?",
+        [username, password],
+        (err, results) => {
+
+            if (err) {
+                return res.send("Database error");
+            }
+            if (results.length > 0) {
+                console.log("SUCCESSFULLY LOGGED IN!");
+                res.render('admin-dashboard');
+            } else {
+                res.send(`<script>
+                    alert('Invalid username or password');
+                    location.href='/login'
+                    </script>`);
+                console.log("Invalid login attempt");
+            }
+        }
+    );
+});
+
 libtrack.get('/admin-reg', (req, res) => {
     res.render('admin-reg');
 });
@@ -44,7 +70,11 @@ libtrack.post('/admin-reg', (req, res) => {
 });
 
 
+libtrack.get('/admin-dashboard', (req, res) => {
+    res.render('admin-dashboard');
+});
 
-libtrack.listen(4000, () => {
-    console.log("You are running on port 3000");
+
+libtrack.listen(4500, () => {
+    console.log("You are running on port 4500");
 });
