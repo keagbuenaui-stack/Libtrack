@@ -78,17 +78,20 @@ libtrack.post('/admin-reg', (req, res) => {
 // ========= ADMIN DASHBOARD =========
 libtrack.get('/admin-dashboard', (req, res) => {
     conn.query('SELECT * FROM courses', (err, courses) => {
-        if (err) {
-            return res.send("Database error");
-        }
+        if (err) return res.send("Database error");
 
-        res.render('admin-dashboard', {
-            courses: courses
+        conn.query('SELECT * FROM students', (err, students) => {
+            if (err) return res.send("Database error");
+
+            res.render('admin-dashboard', {
+                courses: courses,
+                students: students
+            });
         });
     });
 });
 
-// ========= FOR ADDING STUDENTS =========
+// ========= FOR ADDING STUDENT visits =========
 libtrack.post('/add-student', (req, res) => {
     const school_id = req.body.school_id;
     const fullname = req.body.fullname;
@@ -116,6 +119,13 @@ libtrack.post('/add-student', (req, res) => {
             </script>`);
         }
     );
+});
+
+
+//========== LOGOUT =========
+libtrack.get('/logout', (req, res) => {
+    console.log("ADMIN LOGGED OUT!");
+    res.redirect('/login');
 });
 
 libtrack.listen(4500, () => {
