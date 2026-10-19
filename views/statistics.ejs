@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Visit Statistics</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <h1>Student Visit Statistics</h1>
+    <a href="/admin-dashboard">Back to dashboard</a>
+
+    <div class="chart-box">
+        <h2><center>Weekly Visits </center></h2>
+        <canvas id="weeklyChart"></canvas>
+    </div>
+
+    <div class="chart-box">
+        <h2><center>Monthly Visits</center></h2>
+        <canvas id="monthlyChart"></canvas>
+    </div>
+
+    <div class="chart-box">
+        <h2><center>Total Visits per Course</center></h2>
+        <canvas id="courseChart"></canvas>
+    </div>
+
+    <div id="statistics-data"
+         data-weekly="<%= JSON.stringify(weekly) %>"
+         data-monthly="<%= JSON.stringify(monthly) %>"
+         data-courses="<%= JSON.stringify(courseVisits) %>"
+         hidden></div>
+
+    <script>
+        // Data sent from the server (libtrack.js)
+        const statisticsData = document.getElementById('statistics-data').dataset;
+        const weekly = JSON.parse(statisticsData.weekly);
+        const monthly = JSON.parse(statisticsData.monthly);
+        const courses = JSON.parse(statisticsData.courses);
+
+        // 1. Bar chart - weekly visits
+        new Chart(document.getElementById('weeklyChart'), {
+            type: 'bar',
+            data: {
+                labels: weekly.map(row => row.label),
+                datasets: [{
+                    label: 'Visits',
+                    data: weekly.map(row => row.total),
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)'
+                }]
+            },
+            options: { scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+        });
+
+        // 2. Line chart - monthly visits
+        new Chart(document.getElementById('monthlyChart'), {
+            type: 'line',
+            data: {
+                labels: monthly.map(row => row.label),
+                datasets: [{
+                    label: 'Visits',
+                    data: monthly.map(row => row.total),
+                    borderColor: 'rgb(255, 99, 132)',
+                    tension: 0.3
+                }]
+            },
+            options: { scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+        });
+
+        // 3. Horizontal bar chart - total visits per course
+        new Chart(document.getElementById('courseChart'), {
+            type: 'bar',
+            data: {
+                labels: courses.map(row => row.label),
+                datasets: [{
+                    label: 'Total visits',
+                    data: courses.map(row => row.total),
+                    backgroundColor: 'rgba(75, 192, 192, 0.6)'
+                }]
+            },
+            options: {
+                indexAxis: 'y',   // this makes the bars horizontal
+                scales: { x: { beginAtZero: true, ticks: { precision: 0 } } }
+            }
+        });
+    </script>
+</body>
+</html>
