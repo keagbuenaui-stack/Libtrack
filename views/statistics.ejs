@@ -30,13 +30,11 @@
          hidden></div>
 
     <script>
-        // Data sent from the server (libtrack.js)
         const statisticsData = document.getElementById('statistics-data').dataset;
         const weekly = JSON.parse(statisticsData.weekly);
         const monthly = JSON.parse(statisticsData.monthly);
         const courses = JSON.parse(statisticsData.courses);
 
-        // 1. Bar chart - weekly visits
         new Chart(document.getElementById('weeklyChart'), {
             type: 'bar',
             data: {
@@ -50,7 +48,6 @@
             options: { scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
         });
 
-        // 2. Line chart - monthly visits
         new Chart(document.getElementById('monthlyChart'), {
             type: 'line',
             data: {
@@ -65,7 +62,6 @@
             options: { scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
         });
 
-        // 3. Horizontal bar chart - total visits per course
         new Chart(document.getElementById('courseChart'), {
             type: 'bar',
             data: {
@@ -77,7 +73,7 @@
                 }]
             },
             options: {
-                indexAxis: 'y',   // this makes the bars horizontal
+                indexAxis: 'y',
                 scales: { x: { beginAtZero: true, ticks: { precision: 0 } } }
             }
         });

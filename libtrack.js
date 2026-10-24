@@ -77,10 +77,9 @@ libtrack.post('/admin-reg', (req, res) => {
 // ========= ADMIN DASHBOARD =========
 libtrack.get('/admin-dashboard', (req, res) => {
     conn.query('SELECT * FROM courses', (err, courses) => {
-        if (err) { console.log(err); return res.send("Database error"); }
-
-        conn.query('SELECT * FROM students', (err, students) => {
-            if (err) { console.log(err); return res.send("Database error"); }
+        if (err) {
+            return res.send("Database error");
+        }
 
             res.render('admin-dashboard', {
                 courses: courses,
@@ -88,7 +87,6 @@ libtrack.get('/admin-dashboard', (req, res) => {
             });
         });
     });
-});
 
 // ========= FOR ADDING STUDENT visits =========
 libtrack.post('/add-student', (req, res) => {
@@ -118,62 +116,6 @@ libtrack.post('/add-student', (req, res) => {
             </script>`);
         }
     );
-});
-
-// ========= VISIT STATISTICS =========
-libtrack.get('/statistics', (req, res) => {
-
-
-    const weekly = `
-        SELECT DATE_FORMAT(MIN(visit_date), '%b %e') AS label, COUNT(*) AS total
-        FROM visits
-        WHERE visit_date >= DATE_SUB(CURDATE(), INTERVAL 8 WEEK)
-        GROUP BY YEARWEEK(visit_date, 1)
-        ORDER BY YEARWEEK(visit_date, 1)
-    `;
-
-    // Visits per month (last 6 months)
-    const monthly = `
-        SELECT DATE_FORMAT(visit_date, '%b %Y') AS label, COUNT(*) AS total
-        FROM visits
-        WHERE visit_date >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)
-        GROUP BY YEAR(visit_date), MONTH(visit_date), label
-        ORDER BY YEAR(visit_date), MONTH(visit_date)
-    `;
-
-    // Total visits per course
-    const course = `
-        SELECT c.course_name AS label, COUNT(v.visit_id) AS total
-        FROM visits v
-        JOIN students s ON v.school_id = s.school_id
-        JOIN courses c ON s.course_id = c.course_id
-        GROUP BY c.course_id, c.course_name
-        ORDER BY total DESC
-    `;
-
-    conn.query(weekly, (err, weekly) => {
-        if (err) return res.send("Database error");
-
-        conn.query(monthly, (err, monthly) => {
-            if (err) return res.send("Database error");
-
-            conn.query(course, (err, courseVisits) => {
-                if (err) return res.send("Database error");
-
-                res.render('statistics', {
-                    weekly: weekly,
-                    monthly: monthly,
-                    courseVisits: courseVisits
-                });
-            });
-        });
-    });
-});
-
-//========== LOGOUT =========
-libtrack.get('/logout', (req, res) => {
-    console.log("ADMIN LOGGED OUT!");
-    res.redirect('/login');
 });
 
 libtrack.listen(4500, () => {
