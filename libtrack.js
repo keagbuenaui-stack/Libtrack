@@ -74,12 +74,12 @@ libtrack.post('/admin-reg', (req, res) => {
     });
 });
 
-// ========= ADMIN DASHBOARD =========
 libtrack.get('/admin-dashboard', (req, res) => {
     conn.query('SELECT * FROM courses', (err, courses) => {
-        if (err) {
-            return res.send("Database error");
-        }
+        if (err) { console.log(err); return res.send("Database error"); }
+
+        conn.query('SELECT * FROM students', (err, students) => {
+            if (err) { console.log(err); return res.send("Database error"); }
 
             res.render('admin-dashboard', {
                 courses: courses,
@@ -87,6 +87,54 @@ libtrack.get('/admin-dashboard', (req, res) => {
             });
         });
     });
+});
+
+// ========= VISIT STATISTICS =========
+libtrack.get('/statistics', (req, res) => {
+
+    const weeklySql = `
+        SELECT DATE_FORMAT(MIN(visit_date), '%b %e') AS label, COUNT(*) AS total
+        FROM visits
+        WHERE visit_date >= DATE_SUB(CURDATE(), INTERVAL 8 WEEK)
+        GROUP BY YEARWEEK(visit_date, 1)
+        ORDER BY YEARWEEK(visit_date, 1)
+    `;
+
+    const monthlySql = `
+        SELECT DATE_FORMAT(visit_date, '%b %Y') AS label, COUNT(*) AS total
+        FROM visits
+        WHERE visit_date >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)
+        GROUP BY YEAR(visit_date), MONTH(visit_date), label
+        ORDER BY YEAR(visit_date), MONTH(visit_date)
+    `;
+
+    const courseSql = `
+        SELECT c.course_name AS label, COUNT(v.visit_id) AS total
+        FROM visits v
+        JOIN students s ON v.school_id = s.school_id
+        JOIN courses c ON s.course_id = c.course_id
+        GROUP BY c.course_id, c.course_name
+        ORDER BY total DESC
+    `;
+
+    conn.query(weeklySql, (err, weekly) => {
+        if (err) return res.send("Database error");
+
+        conn.query(monthlySql, (err, monthly) => {
+            if (err) return res.send("Database error");
+
+            conn.query(courseSql, (err, courseVisits) => {
+                if (err) return res.send("Database error");
+
+                res.render('statistics', {
+                    weekly: weekly,
+                    monthly: monthly,
+                    courseVisits: courseVisits
+                });
+            });
+        });
+    });
+});
 
 // ========= FOR ADDING STUDENT visits =========
 libtrack.post('/add-student', (req, res) => {
