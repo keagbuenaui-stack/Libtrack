@@ -136,6 +136,27 @@ libtrack.get('/statistics', (req, res) => {
     });
 });
 
+// ========= FOR ADDING COURSE =========
+libtrack.post('/add-course', (req, res) => {
+    const course_name = req.body.course_name;
+
+    conn.query(
+        "INSERT INTO courses (course_name) VALUES (?)",
+        [course_name],
+        (err) => {
+            if (err) {
+                console.log(err);
+                return res.send("Unable to add course.");
+            }
+
+            res.send(`<script>
+                alert('Course added successfully!');
+                location.href='/admin-dashboard';
+            </script>`);
+        }
+    );
+});
+
 // ========= FOR ADDING STUDENT visits =========
 libtrack.post('/add-student', (req, res) => {
     const school_id = req.body.school_id;
